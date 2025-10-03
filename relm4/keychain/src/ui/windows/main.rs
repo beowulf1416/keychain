@@ -18,12 +18,14 @@ use crate::messages::application::ApplicationMessage;
 use crate::actions::*;
 use crate::ui::windows::{
     explorer::Explorer,
+    explorer_tree::ExplorerTree,
     item::Item
 };
 
 
 pub struct MainWindow {
-    explorer: Controller<Explorer>,
+    // explorer: Controller<Explorer>,
+    explorer: Controller<ExplorerTree>,
     item: Controller<Item>
 }
 
@@ -93,7 +95,10 @@ impl SimpleComponent for MainWindow {
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let explorer = Explorer::builder()
+        // let explorer = Explorer::builder()
+        //     .launch(())
+        //     .forward(sender.input_sender(), identity);
+        let explorer = ExplorerTree::builder()
             .launch(())
             .forward(sender.input_sender(), identity);
 
