@@ -7,7 +7,11 @@ use relm4::{
     // actions::*,
     ComponentParts,
     ComponentSender,
-    SimpleComponent
+    SimpleComponent,
+    typed_view::column::{
+        LabelColumn,
+        TypedColumnView
+    }
 };
 
 
@@ -15,12 +19,53 @@ use crate::messages::{
     application::ApplicationMessage,
     explorer::ExplorerMessage
 };
-// use crate::actions::*;
+
+
+
+
+#[derive(Debug, PartialEq, Eq)]
+struct TreeItem {
+    name: String
+}
+
+impl TreeItem {
+    fn new(name: &str) -> Self {
+        return Self {
+            name: String::from(name)
+        };
+    }
+}
+
+
+struct NameColumn {
+
+}
+
+
+impl LabelColumn for NameColumn {
+    type Item = TreeItem;
+    type Value = String;
+
+    const COLUMN_NAME: &'static str = "Name";
+    const ENABLE_SORT: bool = false;
+    const ENABLE_RESIZE: bool = false;
+
+    fn get_cell_value(item: &Self::Item) -> Self::Value {
+        return item.name.clone();
+    }
+
+    fn format_cell_value(value: &Self::Value) -> String {
+        return value.to_string();
+    }
+}
+
+
+
 
 
 
 pub struct Explorer {
-
+    tv_wrapper: TypedColumnView<TreeItem, gtk::SingleSelection>
 }
 
 
@@ -34,10 +79,14 @@ impl SimpleComponent for Explorer {
         gtk::Box {
             set_hexpand: true,
 
-            gtk::Label {
+            gtk::ScrolledWindow {
                 set_hexpand: true,
-                set_label: "placeholder"
+                set_vexpand: true,
 
+                #[local_ref]
+                tv -> gtk::ColumnView {
+
+                }
             }
         }
     }
@@ -47,7 +96,19 @@ impl SimpleComponent for Explorer {
         _root: Self::Root,
         _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = Explorer {};
+        let mut tv_wrapper = TypedColumnView::<TreeItem, gtk::SingleSelection>::new();
+        tv_wrapper.append_column::<NameColumn>();
+
+        tv_wrapper.append(TreeItem::new("test 1"));
+        tv_wrapper.append(TreeItem::new("test 2"));
+        tv_wrapper.append(TreeItem::new("test 3"));
+
+        let model = Explorer {
+            tv_wrapper
+        };
+
+        let tv = &model.tv_wrapper.view;
+
         let widgets = view_output!();
 
 
